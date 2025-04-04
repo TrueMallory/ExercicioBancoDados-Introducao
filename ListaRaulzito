@@ -1,0 +1,134 @@
+CREATE TABLE clientes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT NOT NULL,
+    email TEXT UNIQUE,
+    idade INTEGER
+);
+
+INSERT INTO clientes (nome, email, idade) VALUES
+('Ana Silva', 'ana@email.com', 30),
+('Bruno Souza', 'bruno@email.com', 22),
+('Carlos Mendes', 'carlos@email.com', 28),
+('Daniela Lima', 'daniela@email.com', 25),
+('Eduardo Rocha', 'eduardo@email.com', 33),
+('Fernanda Alves', 'fernanda@email.com', 29),
+('Gabriel Santos', 'gabriel@email.com', 40),
+('Helena Costa', 'helena@email.com', 18),
+('Igor Martins', 'igor@email.com', 50),
+('Juliana Pereira', 'juliana@email.com', 21);
+
+SELECT * FROM clientes;
+SELECT * FROM clientes WHERE idade > 25;
+SELECT * FROM clientes ORDER BY nome ASC;
+UPDATE clientes SET email = 'ana.silva@email.com' WHERE id = 1;
+DELETE FROM clientes WHERE id = 10;
+
+CREATE TABLE pedidos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    cliente_id INTEGER,
+    valor REAL NOT NULL,
+    data_pedido DATE NOT NULL,
+    FOREIGN KEY (cliente_id) REFERENCES clientes(id)
+);
+
+INSERT INTO pedidos (cliente_id, valor, data_pedido) VALUES
+(1, 150.75, '2024-01-10'),
+(2, 89.90, '2024-01-12'),
+(3, 200.00, '2024-02-03'),
+(4, 45.50, '2024-02-14'),
+(5, 300.00, '2024-02-20'),
+(6, 120.00, '2024-03-01'),
+(7, 500.00, '2024-03-10'),
+(8, 75.00, '2024-03-15'),
+(1, 90.00, '2024-03-20'),
+(3, 180.00, '2024-03-22');
+
+SELECT * FROM pedidos WHERE valor > 100;
+SELECT COUNT(*) AS total_clientes FROM clientes;
+SELECT AVG(valor) AS media_pedidos FROM pedidos;
+SELECT MAX(valor) AS pedido_mais_caro FROM pedidos;
+SELECT * FROM pedidos WHERE cliente_id = 1;
+
+SELECT c.*
+FROM clientes c
+LEFT JOIN pedidos p ON c.id = p.cliente_id
+WHERE p.id IS NULL;
+
+SELECT cliente_id, COUNT(*) AS quantidade_pedidos
+FROM pedidos
+GROUP BY cliente_id;
+
+SELECT cliente_id, SUM(valor) AS total_gasto
+FROM pedidos
+GROUP BY cliente_id;
+
+SELECT cliente_id, COUNT(*) AS qtd
+FROM pedidos
+GROUP BY cliente_id
+HAVING COUNT(cliente_id) > 1;
+
+DELETE FROM pedidos;
+
+CREATE TABLE livros (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    titulo TEXT,
+    autor TEXT
+);
+
+CREATE TABLE emprestimos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    livro_id INTEGER,
+    cliente_id INTEGER,
+    data_emprestimo DATE,
+    FOREIGN KEY (livro_id) REFERENCES livros(id),
+    FOREIGN KEY (cliente_id) REFERENCES clientes(id)
+);
+
+INSERT INTO livros (titulo, autor) VALUES
+('1984', 'George Orwell'),
+('Dom Casmurro', 'Machado de Assis'),
+('A Revolução dos Bichos', 'George Orwell'),
+('O Pequeno Príncipe', 'Antoine de Saint-Exupéry'),
+('Capitães da Areia', 'Jorge Amado');
+
+INSERT INTO emprestimos (livro_id, cliente_id, data_emprestimo) VALUES
+(1, 2, '2024-01-10'),
+(3, 5, '2024-01-12'),
+(4, 1, '2024-01-15');
+
+SELECT l.titulo, c.nome
+FROM emprestimos e
+JOIN livros l ON e.livro_id = l.id
+JOIN clientes c ON e.cliente_id = c.id;
+
+CREATE TABLE produtos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT,
+    preco REAL,
+    estoque INTEGER
+);
+
+CREATE TABLE vendas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    produto_id INTEGER,
+    quantidade INTEGER,
+    data_venda DATE,
+    FOREIGN KEY (produto_id) REFERENCES produtos(id)
+);
+
+INSERT INTO produtos (nome, preco, estoque) VALUES
+('Teclado', 120.00, 50),
+('Mouse', 80.00, 100),
+('Monitor', 900.00, 20),
+('HD Externo', 300.00, 30),
+('Notebook', 3500.00, 10);
+
+INSERT INTO vendas (produto_id, quantidade, data_venda) VALUES
+(1, 2, '2024-02-10'),
+(2, 5, '2024-02-11'),
+(5, 1, '2024-02-12');
+
+SELECT p.nome, SUM(v.quantidade * p.preco) AS total_arrecadado
+FROM vendas v
+JOIN produtos p ON v.produto_id = p.id
+GROUP BY p.nome;
